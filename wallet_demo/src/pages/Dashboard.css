@@ -148,6 +148,41 @@
   background: #ffffff;
 }
 
+.wallet-info{
+  position: relative;
+}
+
+.create-nft-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+
+  background-color: #4f46e5;   /* soft indigo */
+  color: #eef2ff;              /* primary indigo */
+
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.create-nft-btn:hover {
+  background-color: #e0e7ff;
+  transform: translateY(-1px);
+}
+
+.create-nft-btn:active {
+  transform: translateY(0);
+}
+
+.create-nft-btn:disabled{
+  cursor: not-allowed;
+}
 
 /* Mobile */
 @media (max-width: 480px) {

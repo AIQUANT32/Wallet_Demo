@@ -3,6 +3,7 @@ import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import SRP from "./pages/SRP";
+import NFT from "./pages/NFT";
 import "./App.css";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/srp" element={<SRP />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/nft" element={<NFT />} />
           <Route path="/" element={<Navigate to="/signup" replace />} />
         </Routes>
       </div>

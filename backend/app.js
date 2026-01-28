@@ -116,6 +116,7 @@ app.post("/login", async (req, res) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "1h" }
     );
+    console.log(token);
 
     res.status(200).json({
       message: "Login successful",

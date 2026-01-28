@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ethers } from "ethers";
 import {Lucid, Blockfrost} from "lucid-cardano";
+import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
 // WALLET DETECTION
@@ -43,6 +44,7 @@ function Dashboard() {
   const [toAddress,setToAddress] = useState("");
   const [amount,setAmount] = useState("");
   const [txHash, setTxHash] = useState("");
+  const navigate = useNavigate();
 
   // CONNECT CLICK
   const handleConnectClick = () => {
@@ -250,95 +252,95 @@ function Dashboard() {
   };
 
   return (
-  <div className="dashboard-container">
-    <div className="dashboard-card">
-      <h1 className="dashboard-title">Wallet Dashboard</h1>
-      <p className="dashboard-subtitle">
-        Connect your blockchain wallet securely
-      </p>
+    <div className="dashboard-container">
+      <div className="dashboard-card">
+        <h1 className="dashboard-title">Wallet Dashboard</h1>
+        <p className="dashboard-subtitle">
+          Connect your blockchain wallet securely
+        </p>
 
-      <button
-        className="primary-button"
-        onClick={handleConnectClick}
-      >
-        Detect Wallets
-      </button>
+        <button className="primary-button" onClick={handleConnectClick}>
+          Detect Wallets
+        </button>
 
-      {walletOptions.length > 0 && (
-        <div className="wallet-select">
-          <select
-            value={selected}
-            onChange={(e) => setSelected(e.target.value)}
-          >
-            <option value="">Select Wallet</option>
-            {walletOptions.map((w) => (
-              <option key={w.name} value={w.name}>
-                {w.name}
-              </option>
-            ))}
-          </select>
+        {walletOptions.length > 0 && (
+          <div className="wallet-select">
+            <select
+              value={selected}
+              onChange={(e) => setSelected(e.target.value)}
+            >
+              <option value="">Select Wallet</option>
+              {walletOptions.map((w) => (
+                <option key={w.name} value={w.name}>
+                  {w.name}
+                </option>
+              ))}
+            </select>
 
-          <button
-            className="secondary-button"
-            onClick={connectSelectedWallet}
-            disabled={loading}
-          >
-            {loading ? "Connecting..." : "Connect"}
-          </button>
-        </div>
-      )}
-
-      {connectedInfo && (
-        <div className="wallet-info">
-          <h3>Connected Wallet</h3>
-
-          <div className="wallet-row">
-            <span>Wallet</span>
-            <p>{connectedInfo.wallet}</p>
+            <button
+              className="secondary-button"
+              onClick={connectSelectedWallet}
+              disabled={loading}
+            >
+              {loading ? "Connecting..." : "Connect"}
+            </button>
           </div>
+        )}
 
-          <div className="wallet-row">
-            <span>Address</span>
-            <p className="mono">{connectedInfo.address}</p>
-          </div>
+        {connectedInfo && (
+          
+          <div className="wallet-info">
+            <h3>Connected Wallet</h3>
 
-          <div className="wallet-row">
-            <span>Balance</span>
-            <p className="mono">{connectedInfo.bal}</p>
-          </div>
+            <button className="create-nft-btn" onClick={() => navigate("/nft")} disabled={connectedInfo.type!=="ethereum"}>
+              Create NFT
+            </button>
 
-          <h3>Send Transaction</h3>
-
-          <input
-            placeholder="Receiver address"
-            value={toAddress}
-            onChange={(e) => setToAddress(e.target.value)}
-          />
-
-          <input
-            placeholder="Amount"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-
-          <button
-            className="primary-button"
-            onClick={sendTransaction}
-          >
-            Send
-          </button>
-
-          {txHash && (
             <div className="wallet-row">
-              <span>Transaction Hash</span>
-              <p className="mono">{txHash}</p>
+              <span>Wallet</span>
+              <p>{connectedInfo.wallet}</p>
             </div>
-          )}
-        </div>
-      )}
+
+            <div className="wallet-row">
+              <span>Address</span>
+              <p className="mono">{connectedInfo.address}</p>
+            </div>
+
+            <div className="wallet-row">
+              <span>Balance</span>
+              <p className="mono">{connectedInfo.bal}</p>
+            </div>
+
+            <h3>Send Transaction</h3>
+
+            <input
+              placeholder="Receiver address"
+              value={toAddress}
+              onChange={(e) => setToAddress(e.target.value)}
+            />
+
+            <input
+              placeholder="Amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+
+            <button className="primary-button" onClick={sendTransaction}>
+              Send
+            </button>
+
+            {txHash && (
+              <div className="wallet-row">
+                <span>Transaction Hash</span>
+                <p className="mono">{txHash}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
-  </div>
   );
+
 }
 
 export default Dashboard;
