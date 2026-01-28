@@ -52,6 +52,9 @@ app.post("/submit", async (req, res) => {
       return res.status(400).json({ error: "All fields are required" });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 7);
+    console.log(hashedPassword );
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
@@ -59,13 +62,17 @@ app.post("/submit", async (req, res) => {
 
     const srp = generateSRP();
 
+     console.log(srp)
+
     await User.create({
       firstName,
       lastName,
       email,
-      password,
+      password: hashedPassword,
       srp,
     });
+    
+   
 
     res.status(201).json({
       message: "User created successfully",
@@ -86,11 +93,20 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    const user = await User.findOne({ email, password, srp });
+    const user = await User.findOne({ srp });
 
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
+
+    const isSame = bcrypt.compareSync(password, user.password);
+    console.log(isSame);
+    if(!isSame){
+      return res.status(401).json({
+        error:"Invalid credentials"
+      });
+    }
+
 
     const token = jwt.sign(
       {

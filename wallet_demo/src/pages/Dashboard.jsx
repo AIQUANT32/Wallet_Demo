@@ -54,6 +54,50 @@ function Dashboard() {
     setWalletOptions(detected);
   };
 
+  // Switch to testnet
+  async function switchToSepolia() {
+  if (window.ethereum) {
+    const SEPOLIA_CHAIN_ID = process.env.REACT_APP_SEPOLIA_CHAIN_ID;
+    const SEPOLIA_RPC_URL = process.env.REACT_APP_SEPOLIA_RPC_URL;
+    try {
+      // 11155111 in decimal is 0xaa36af in hex
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: SEPOLIA_CHAIN_ID}],
+      });
+      console.log("Switched to Sepolia successfully");
+    } catch (switchError) {
+      // 4902 error code indicates the chain has not been added to MetaMask
+      if (switchError.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [
+              {
+                chainId: SEPOLIA_CHAIN_ID,
+                chainName: 'Sepolia Testnet',
+                rpcUrls: [SEPOLIA_RPC_URL], // Alternative: Infura/Alchemy
+                nativeCurrency: {
+                  name: 'Sepolia ETH',
+                  symbol: 'ETH',
+                  decimals: 18,
+                },
+                blockExplorerUrls: ['https://sepolia.etherscan.io'],
+              },
+            ],
+          });
+        } catch (addError) {
+          console.error("Failed to add Sepolia:", addError);
+        }
+      } else {
+        console.error("Failed to switch to Sepolia:", switchError);
+      }
+    }
+  } else {
+    console.error("MetaMask is not installed");
+  }
+}
+
   // CONNECT SELECTED
 
   const connectSelectedWallet = async () => {
@@ -77,7 +121,10 @@ function Dashboard() {
 
       // Ethereum
       if (wallet.type === "ethereum") {
-        const provider = new ethers.BrowserProvider(wallet.provider);
+        await switchToSepolia()
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const network = await provider.getNetwork();
+        console.log(network);
         const signer = await provider.getSigner();
         address = await signer.getAddress();
         bal=await provider.getBalance(address);
@@ -147,6 +194,7 @@ function Dashboard() {
     let hash;
     if(connectedInfo.type==="ethereum"){
       const provider = new ethers.BrowserProvider(window.ethereum);
+      // console.log(provider);
       const signer = await provider.getSigner();
 
       const tx = await signer.sendTransaction({
@@ -154,8 +202,10 @@ function Dashboard() {
         value: ethers.parseEther(amount),
       });
 
-      await tx.wait();
-      hash = tx.wait;
+      const receipt = await tx.wait();
+      hash = receipt.hash;
+
+      // console.log(hash);
     }
     if(connectedInfo.type==="cardano"){
       const api = await window.cardano[
