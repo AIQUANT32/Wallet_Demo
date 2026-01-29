@@ -7,7 +7,8 @@ require("dotenv").config();
 
 const User = require("./database/User");
 const Wallet = require("./database/Wallet");
-const Transaction=require("./database/Transaction");
+const Transaction = require("./database/Transaction");
+const Mint = require("./database/Mint");
 const jwt = require("jsonwebtoken");
 const authenticateToken = require("./middleware/auth");
 
@@ -52,8 +53,8 @@ app.post("/submit", async (req, res) => {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 7);
-    console.log(hashedPassword );
+    const hashedPassword = await bcrypt.hash(password, 15);
+    console.log(hashedPassword);
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -62,7 +63,7 @@ app.post("/submit", async (req, res) => {
 
     const srp = generateSRP();
 
-     console.log(srp)
+    console.log(srp)
 
     await User.create({
       firstName,
@@ -71,8 +72,8 @@ app.post("/submit", async (req, res) => {
       password: hashedPassword,
       srp,
     });
-    
-   
+
+
 
     res.status(201).json({
       message: "User created successfully",
@@ -101,9 +102,9 @@ app.post("/login", async (req, res) => {
 
     const isSame = bcrypt.compareSync(password, user.password);
     console.log(isSame);
-    if(!isSame){
+    if (!isSame) {
       return res.status(401).json({
-        error:"Invalid credentials"
+        error: "Invalid credentials"
       });
     }
 
@@ -151,12 +152,12 @@ app.post("/api/wallet/connect", async (req, res) => {
         error: "User not found with the provided SRP",
       });
     }
-    let wallet=await Wallet.findOne({srp,walletName,address});
-    if(!wallet){
+    let wallet = await Wallet.findOne({ srp, walletName, address });
+    if (!wallet) {
       wallet = await Wallet.create({
-      srp,
-      walletName,
-      address,
+        srp,
+        walletName,
+        address,
       });
     }
 
@@ -175,9 +176,10 @@ app.post("/api/wallet/connect", async (req, res) => {
   }
 });
 
-app.post("/api/wallet/transaction", async(req,res) => {
-  try{
-    const{srp,walletName,from,to,amount,txHash}=req.body;
+// Store Transaction in MONGO
+app.post("/api/wallet/transaction", async (req, res) => {
+  try {
+    const { srp, walletName, from, to, amount, txHash } = req.body;
 
     if (!srp || !from || !to || !amount || !txHash) {
       return res.status(400).json({ error: "Missing fields" });
@@ -204,6 +206,35 @@ app.post("/api/wallet/transaction", async(req,res) => {
   } catch (err) {
     console.error("Transaction error:", err);
     res.status(500).json({ error: "Transaction failed" });
+  }
+});
+
+app.post("/api/mint", async (req, res) => {
+  try {
+    const { owner, nftName, txHash } = req.body;
+
+    if (!owner || !nftName || !txHash) {
+      return res.status(400).json({ error: "Missing fields" });
+    }
+
+    const exist = await Mint.findOne({ nftName });
+    if (exist) {
+      return res.status(409).json({ error: "NFT already Created" });
+    }
+
+    const tx = await Mint.create({
+      owner,
+      nftName,
+      txHash,
+    });
+
+    return res.status(201).json({
+      message: "Transaction saved",
+      transaction: tx,
+    });
+  }
+  catch (err) {
+    console.error(err);
   }
 });
 

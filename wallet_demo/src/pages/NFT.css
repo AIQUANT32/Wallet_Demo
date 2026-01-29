@@ -1,5 +1,5 @@
-/* Page container — same as dashboard */
-.nft-container {
+/* reuse existing */
+.dashboard-container {
   min-height: 100vh;
   width: 100%;
   display: flex;
@@ -9,85 +9,44 @@
   padding: 24px;
 }
 
-/* Card — same feel as dashboard-card */
-.nft-card {
+.dashboard-card {
   width: 100%;
-  max-width: 620px;
+  max-width: 420px;
   background: #ffffff;
   padding: 36px;
   border-radius: 18px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-  text-align: center;
 }
 
-/* Headings */
-.nft-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 6px;
-}
-
-.nft-subtitle {
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 28px;
-}
-
-/* Upload box */
-.upload-box {
+/* Inputs */
+.dashboard-input {
   width: 100%;
-  height: 220px;
-  border-radius: 14px;
-  border: 2px dashed #e5e7eb;
-  background: #f9fafb;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
-  margin-bottom: 24px;
-}
-
-.upload-box:hover {
-  border-color: #4f46e5;
-  background-color: #ffffff;
-}
-
-/* Upload placeholder */
-.upload-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #6b7280;
-}
-
-.upload-icon {
-  font-size: 32px;
-  margin-bottom: 10px;
-}
-
-.upload-placeholder p {
+  padding: 14px;
   font-size: 14px;
-  font-weight: 500;
-  color: #374151;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #111827;
+  margin-bottom: 14px;
 }
 
-.upload-placeholder small {
-  font-size: 12px;
+.dashboard-input::placeholder {
   color: #9ca3af;
 }
 
-/* Image preview */
-.upload-preview {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 12px;
+.dashboard-input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  background: #ffffff;
 }
 
-/* Mint button — reuse primary-button look */
-.nft-mint-btn {
+.mono {
+  font-family: monospace;
+  word-break: break-all;
+}
+
+/* Buttons */
+.primary-button {
   width: 100%;
   padding: 14px;
   font-size: 15px;
@@ -97,27 +56,45 @@
   cursor: pointer;
   background-color: #4f46e5;
   color: #ffffff;
+  margin-bottom: 20px;
+  
 }
 
-.nft-mint-btn:hover {
+.primary-button:hover {
   background-color: #4338ca;
 }
 
-.nft-mint-btn:disabled {
+.primary-button:disabled{
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* Status text */
-.nft-status {
-  margin-top: 14px;
-  font-size: 14px;
-  color: #374151;
+.secondary-button {
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.secondary-button:hover {
+  background: #f3f4f6;
+}
+
+/* Divider */
+.divider {
+  border: none;
+  height: 1px;
+  background: #e5e7eb;
+  margin: 20px 0;
 }
 
 /* Mobile */
 @media (max-width: 480px) {
-  .nft-card {
+  .dashboard-card {
     padding: 24px 20px;
   }
 }
