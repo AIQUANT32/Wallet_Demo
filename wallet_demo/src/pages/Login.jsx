@@ -1,22 +1,72 @@
-import { useState } from 'react';
-import { useNavigate, Link} from 'react-router-dom';
-import './SignUp.css';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { detectWalletOptions, getAddressFromWallet } from "../utils/walletUtils";
+import "./SignUp.css";
+
+const API_BASE = "http://localhost:5000/api";
 
 function Login() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email:'',
-    password:'',
-    srp:'',
+    email: "",
+    password: "",
+    srp: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const [walletOptions, setWalletOptions] = useState([]);
+  const [selectedWallet, setSelectedWallet] = useState("");
+  const [walletLoading, setWalletLoading] = useState(false);
+  const [showWalletSelect, setShowWalletSelect] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
-    setError('');
+    setError("");
+  };
+
+  const handleConnectWithWalletClick = () => {
+    const detected = detectWalletOptions();
+    if (!detected.length) {
+      setError("No supported wallets found. Install MetaMask or a Cardano wallet.");
+      return;
+    }
+    setError("");
+    setWalletOptions(detected);
+    setShowWalletSelect(true);
+  };
+
+  const handleWalletLogin = async () => {
+    const wallet = walletOptions.find((w) => w.name === selectedWallet);
+    if (!wallet) {
+      setError("Please select a wallet");
+      return;
+    }
+    try {
+      setWalletLoading(true);
+      setError("");
+      const { address, walletName, type } = await getAddressFromWallet(wallet);
+      const res = await fetch(`${API_BASE}/auth/login-with-wallet`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ walletName, address, type }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("srp", data.srp);
+        localStorage.setItem("primaryWallet", JSON.stringify(data.primaryWallet));
+        navigate("/dashboard");
+      } else {
+        setError(data.error || "Login with wallet failed");
+      }
+    } catch (err) {
+      setError(err.message || "Failed to connect wallet");
+    } finally {
+      setWalletLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -29,7 +79,7 @@ function Login() {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/login', {
+      const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,6 +150,52 @@ function Login() {
           <button className="primary-button" type="submit">
             Log in
           </button>
+
+          <div className="auth-divider">
+            <span>or</span>
+          </div>
+
+          {!showWalletSelect ? (
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={handleConnectWithWalletClick}
+            >
+              Connect with Wallet
+            </button>
+          ) : (
+            <div className="wallet-select-auth">
+              <select
+                value={selectedWallet}
+                onChange={(e) => setSelectedWallet(e.target.value)}
+              >
+                <option value="">Select wallet</option>
+                {walletOptions.map((w) => (
+                  <option key={w.name} value={w.name}>
+                    {w.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={handleWalletLogin}
+                disabled={walletLoading || !selectedWallet}
+              >
+                {walletLoading ? "Connecting..." : "Log in with Wallet"}
+              </button>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => {
+                  setShowWalletSelect(false);
+                  setSelectedWallet("");
+                }}
+              >
+                Back
+              </button>
+            </div>
+          )}
         </form>
 
         <p className="auth-footer">

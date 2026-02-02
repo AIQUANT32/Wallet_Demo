@@ -1,50 +1,67 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import {Lucid, Blockfrost} from "lucid-cardano";
+import { Lucid, Blockfrost } from "lucid-cardano";
 import { useNavigate } from "react-router-dom";
+import { detectWalletOptions, switchToSepolia } from "../utils/walletUtils";
 import "./Dashboard.css";
-
-// WALLET DETECTION
-
-const detectWalletOptions = () => {
-  const options = [];
-
-  // MetaMask (Ethereum)
-  if (window.ethereum) {
-    const providers = window.ethereum.providers || [window.ethereum];
-    providers.forEach((provider) => {
-      if (provider.isMetaMask) {
-        options.push({
-          name: "MetaMask",
-          type: "ethereum",
-          provider,
-        });
-      }
-    });
-  }
-
-  // Cardano wallets
-  if (window.cardano) {
-    if (window.cardano.eternl) {
-      options.push({ name: "Eternl", type: "cardano", wallet: window.cardano.eternl });
-    }
-    if (window.cardano.lace) {
-      options.push({ name: "Lace", type: "cardano", wallet: window.cardano.lace });
-    }
-  }
-
-  return options;
-};
 
 function Dashboard() {
   const [walletOptions, setWalletOptions] = useState([]);
   const [selected, setSelected] = useState("");
   const [connectedInfo, setConnectedInfo] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [toAddress,setToAddress] = useState("");
-  const [amount,setAmount] = useState("");
+  const [toAddress, setToAddress] = useState("");
+  const [amount, setAmount] = useState("");
   const [txHash, setTxHash] = useState("");
   const navigate = useNavigate();
+
+  // Preload wallet from "Connect with Wallet" signup/login
+  useEffect(() => {
+    const primaryWallet = localStorage.getItem("primaryWallet");
+    if (!primaryWallet) return;
+    try {
+      const { walletName, address, type } = JSON.parse(primaryWallet);
+      setConnectedInfo({
+        wallet: walletName,
+        type: type || "ethereum",
+        address,
+        bal: "Loading...",
+      });
+      (async () => {
+        try {
+          let bal = "—";
+          if (type === "ethereum") {
+            await switchToSepolia();
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+            const balance = await provider.getBalance(address);
+            bal = `${ethers.formatEther(balance)} ETH`;
+          } else if (type === "cardano" && window.cardano?.[walletName.toLowerCase()]) {
+            const api = await window.cardano[walletName.toLowerCase()].enable();
+            const lucid = await Lucid.new(
+              new Blockfrost(
+                "https://cardano-preprod.blockfrost.io/api/v0",
+                process.env.REACT_APP_BLOCKFROST_KEY
+              ),
+              "Preprod"
+            );
+            lucid.selectWallet(api);
+            const utxos = await lucid.wallet.getUtxos();
+            let totalLovelace = 0n;
+            utxos.forEach((u) => {
+              totalLovelace += u.assets.lovelace || 0n;
+            });
+            bal = `${Number(totalLovelace) / 1_000_000} ADA`;
+          }
+          setConnectedInfo((prev) => (prev ? { ...prev, bal } : null));
+        } catch (err) {
+          setConnectedInfo((prev) => (prev ? { ...prev, bal: "Error loading" } : null));
+        }
+      })();
+    } catch (e) {
+      // ignore invalid primaryWallet
+    }
+  }, []);
 
   // CONNECT CLICK
   const handleConnectClick = () => {
@@ -55,50 +72,6 @@ function Dashboard() {
     }
     setWalletOptions(detected);
   };
-
-  // Switch to testnet
-  async function switchToSepolia() {
-  if (window.ethereum) {
-    const SEPOLIA_CHAIN_ID = process.env.REACT_APP_SEPOLIA_CHAIN_ID;
-    const SEPOLIA_RPC_URL = process.env.REACT_APP_SEPOLIA_RPC_URL;
-    try {
-      // 11155111 in decimal is 0xaa36af in hex
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: SEPOLIA_CHAIN_ID}],
-      });
-      console.log("Switched to Sepolia successfully");
-    } catch (switchError) {
-      // 4902 error code indicates the chain has not been added to MetaMask
-      if (switchError.code === 4902) {
-        try {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [
-              {
-                chainId: SEPOLIA_CHAIN_ID,
-                chainName: 'Sepolia Testnet',
-                rpcUrls: [SEPOLIA_RPC_URL], // Alternative: Infura/Alchemy
-                nativeCurrency: {
-                  name: 'Sepolia ETH',
-                  symbol: 'ETH',
-                  decimals: 18,
-                },
-                blockExplorerUrls: ['https://sepolia.etherscan.io'],
-              },
-            ],
-          });
-        } catch (addError) {
-          console.error("Failed to add Sepolia:", addError);
-        }
-      } else {
-        console.error("Failed to switch to Sepolia:", switchError);
-      }
-    }
-  } else {
-    console.error("MetaMask is not installed");
-  }
-}
 
   // CONNECT SELECTED
 
@@ -123,7 +96,7 @@ function Dashboard() {
 
       // Ethereum
       if (wallet.type === "ethereum") {
-        await switchToSepolia()
+        await switchToSepolia();
         const provider = new ethers.BrowserProvider(window.ethereum);
         const network = await provider.getNetwork();
         console.log(network);
@@ -169,7 +142,7 @@ function Dashboard() {
 
       // Save wallet
       const token = localStorage.getItem("token");
-      await fetch("http://localhost:5000/api/wallet/connect", {
+      await fetch("http://localhost:5000/api/connect", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
