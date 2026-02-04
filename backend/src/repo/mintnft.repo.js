@@ -1,4 +1,4 @@
-const mintSchema = require("../models/transaction.model")
+const mintSchema = require("../models/mint.model")
 
 exports.createNFT = ({owner, nftName, txHash}) => {
     return mintSchema.create({

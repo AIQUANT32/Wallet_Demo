@@ -62,11 +62,6 @@ exports.login = async ({ email, password, srp }) => {
   return {
     message: "Login Successfull",
     token,
-    user: {
-      id: user._id,
-      username: user.username,
-      email: user.email,
-    },
   };
 };
 
@@ -99,7 +94,7 @@ exports.signupWithWallet = async ({ walletName, address, type }) => {
   const token = jwt.sign(
     { userId: user._id, username: user.username },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: "1h" },
+    { expiresIn: "20m" },
   );
 
   return {
