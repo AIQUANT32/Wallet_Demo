@@ -210,7 +210,7 @@ function Dashboard() {
     setTxHash(hash);
 
     const srp=localStorage.getItem("srp");
-    await fetch("http://localhost:5000/api/wallet/transaction",{
+    await fetch("http://localhost:5000/api/transaction",{
       method:"POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify({

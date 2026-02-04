@@ -35,11 +35,7 @@ const userSchema = new mongoose.Schema({
   walletAddress: {
     type: String,
     default: null,
-    sparse: true,
-    unique: true,
   },
 });
-
-userSchema.index({ walletAddress: 1 }, { sparse: true, unique: true });
 
 module.exports = mongoose.model("User", userSchema);

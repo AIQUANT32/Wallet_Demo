@@ -3,7 +3,7 @@ const controller = require("../controller/auth.controller");
 
 /**
  * @swagger
- * /auth/signup:
+ * /api/auth/signup:
  *   post:
  *     summary: Register a new user
  *     description: Creates a new account using name, email and password
@@ -19,7 +19,7 @@ const controller = require("../controller/auth.controller");
  *               - email
  *               - password
  *             properties:
- *               name:
+ *               username:
  *                 type: string
  *                 example: Harjyot Singh
  *               email:
@@ -37,7 +37,7 @@ const controller = require("../controller/auth.controller");
 router.post("/signup", controller.signup);
 /**
  * @swagger
- * /auth/login:
+ * /api/auth/login:
  *   post:
  *     summary: Login user
  *     description: Login using email and password
@@ -58,6 +58,9 @@ router.post("/signup", controller.signup);
  *               password:
  *                 type: string
  *                 example: mypassword123
+ *               srp:
+ *                 type: string
+ *                 example: OFzeQdaPMf
  *     responses:
  *       200:
  *         description: Login successful (JWT returned)
@@ -67,7 +70,7 @@ router.post("/signup", controller.signup);
 router.post("/login", controller.login);
 /**
  * @swagger
- * /auth/signup-with-wallet:
+ * /api/auth/signup-with-wallet:
  *   post:
  *     summary: Register using wallet
  *     description: Creates account using blockchain wallet address instead of password
@@ -81,7 +84,10 @@ router.post("/login", controller.login);
  *             required:
  *               - walletAddress
  *             properties:
- *               walletAddress:
+ *               walletName:
+ *                 type: String
+ *                 example: Metamask
+ *               address:
  *                 type: string
  *                 example: addr1qx2fxv2umy...
  *     responses:
@@ -93,7 +99,7 @@ router.post("/login", controller.login);
 router.post("/signup-with-wallet", controller.signupWithWallet);
 /**
  * @swagger
- * /auth/login-with-wallet:
+ * /api/auth/login-with-wallet:
  *   post:
  *     summary: Login using wallet
  *     description: Authenticates user via wallet address or signature
@@ -107,7 +113,10 @@ router.post("/signup-with-wallet", controller.signupWithWallet);
  *             required:
  *               - walletAddress
  *             properties:
- *               walletAddress:
+ *               walletName:
+ *                 type: String
+ *                 example: Metamask
+ *               address:
  *                 type: string
  *                 example: addr1qx2fxv2umy...
  *     responses:

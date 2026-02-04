@@ -2,7 +2,7 @@ const router = require("express").Router();
 const controller = require("../controller/connectwallet.controller");
 /**
  * @swagger
- * /connect:
+ * /api/connect:
  *   post:
  *     summary: Connect wallet
  *     description: Authenticates or registers a user using their blockchain wallet address
@@ -16,11 +16,15 @@ const controller = require("../controller/connectwallet.controller");
  *             required:
  *               - walletAddress
  *             properties:
- *               walletAddress:
+ *               srp:
+ *                 type: string
+ *                 description: Unique passkey of user
+ *                 example: OFzeQdaPMf
+ *               walletName:
  *                 type: string
  *                 description: Public wallet address of the user
  *                 example: addr1qx2fxv2umyhtk5d8s9example
- *               signature:
+ *               address:
  *                 type: string
  *                 description: Signed message for verification (optional)
  *                 example: 0x98af34bcd123...

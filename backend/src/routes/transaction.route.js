@@ -3,11 +3,10 @@ const router = require("express").Router();
 
 /**
  * @swagger
- * /transaction:
+ * /api/transaction :
  *   post:
- *     summary: Create blockchain transaction
- *     description: Sends funds or tokens from one wallet to another
- *     tags: [Transaction]
+ *     summary: Create a new transaction
+ *     tags: [Transactions]
  *     requestBody:
  *       required: true
  *       content:
@@ -15,40 +14,36 @@ const router = require("express").Router();
  *           schema:
  *             type: object
  *             required:
+ *               - srp
+ *               - walletName
  *               - from
  *               - to
  *               - amount
+ *               - txHash
  *             properties:
+ *               srp:
+ *                 type: string
+ *                 example: "seed-phrase-123"
+ *               walletName:
+ *                 type: string
+ *                 example: "MetaMask"
  *               from:
  *                 type: string
- *                 description: Sender wallet address
- *                 example: addr1senderxyz
+ *                 example: "0xabc123..."
  *               to:
  *                 type: string
- *                 description: Receiver wallet address
- *                 example: addr1receiverxyz
+ *                 example: "0xdef456..."
  *               amount:
  *                 type: number
- *                 example: 10
- *               token:
+ *                 example: 1.5
+ *               txHash:
  *                 type: string
- *                 description: Token name (optional)
- *                 example: ADA
+ *                 example: "0x9a8b7c6d..."
  *     responses:
- *       200:
- *         description: Transaction successful
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 txHash:
- *                   type: string
- *                   example: 0x987hashabc
+ *       201:
+ *         description: Transaction created successfully
  *       400:
- *         description: Invalid transaction
- *       500:
- *         description: Transaction failed
+ *         description: Invalid input
  */
 router.post("/transaction",transactionController.transaction);
 
