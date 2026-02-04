@@ -9,14 +9,29 @@ const authRoutes = require("./src/routes/auth.route");
 const connectWallet = require("./src/routes/connectwallet.route");
 const transaction = require("./src/routes/transaction.route");
 const mint = require("./src/routes/mintnft.route");
-const User = require("./src/models/user.model");
-const Wallet = require("./src/models/wallet.model");
-const Transaction = require("./src/models/transaction.model");
-const Mint = require("./src/models/mint.model");
-const jwt = require("jsonwebtoken");
+const swaggerUi = require("swagger-ui-express")
 const authenticateToken = require("./src/middleware/auth");
+const swaggerJSDoc = require("swagger-jsdoc");
 
 const app = express();
+
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Wallet_Demo',
+      version: '1.0'
+    },
+    servers:[
+      {
+        url:"http://localhost:5000"
+      }
+    ]
+  },
+  apis:['./src/routes/*.js']
+}
+
+const swaggerSpecs =  swaggerJSDoc(options)
 
 
 app.use(cors());
@@ -41,6 +56,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api",connectWallet);
 app.use("/api",transaction);
 app.use("/api",mint);
+app.use("/api-docs", swaggerUi.serve,swaggerUi.setup(swaggerSpecs))
 
 
 // SIGN UP
@@ -208,34 +224,34 @@ app.use("/api",mint);
 //   }
 // });
 
-app.post("/api/mint", async (req, res) => {
-  try {
-    const { owner, nftName, txHash } = req.body;
+// app.post("/api/mint", async (req, res) => {
+//   try {
+//     const { owner, nftName, txHash } = req.body;
 
-    if (!owner || !nftName || !txHash) {
-      return res.status(400).json({ error: "Missing fields" });
-    }
+//     if (!owner || !nftName || !txHash) {
+//       return res.status(400).json({ error: "Missing fields" });
+//     }
 
-    const exist = await Mint.findOne({ nftName });
-    if (exist) {
-      return res.status(409).json({ error: "NFT already Created" });
-    }
+//     const exist = await Mint.findOne({ nftName });
+//     if (exist) {
+//       return res.status(409).json({ error: "NFT already Created" });
+//     }
 
-    const tx = await Mint.create({
-      owner,
-      nftName,
-      txHash,
-    });
+//     const tx = await Mint.create({
+//       owner,
+//       nftName,
+//       txHash,
+//     });
 
-    return res.status(201).json({
-      message: "Transaction saved",
-      transaction: tx,
-    });
-  }
-  catch (err) {
-    console.error(err);
-  }
-});
+//     return res.status(201).json({
+//       message: "Transaction saved",
+//       transaction: tx,
+//     });
+//   }
+//   catch (err) {
+//     console.error(err);
+//   }
+// });
 
 // SERVER START
 app.listen(5000, () => {
